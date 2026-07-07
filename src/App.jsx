@@ -12,17 +12,15 @@ import {
 } from './services/activityService';
 import { 
   Activity, 
-  ShieldCheck, 
   Lock, 
   Loader2, 
   AlertOctagon, 
-  ShieldAlert,
-  ArrowRight,
-  GraduationCap
+  ShieldAlert
 } from 'lucide-react';
 
 // Client-side authentication credentials
-const TEACHER_EMAIL = import.meta.env.VITE_TEACHER_EMAIL || 'docente@addison.edu';
+const APP_NAME = 'AulaNova';
+const TEACHER_EMAIL = import.meta.env.VITE_TEACHER_EMAIL || 'docente@aulanova.edu';
 const TEACHER_PASSWORD = import.meta.env.VITE_TEACHER_PASSWORD || 'Fabrizio2026';
 
 function App() {
@@ -210,7 +208,7 @@ function App() {
                   <input 
                     type="email" 
                     className="form-control" 
-                    placeholder="ejemplo@addison.edu"
+                    placeholder="docente@aulanova.edu"
                     required
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
@@ -267,6 +265,7 @@ function App() {
           <>
             <Home 
               onStartActivity={handleRegisterStudent} 
+              onGoToTeacher={() => navigate('/docente')}
             />
             {activityError && (
               <div style={{ maxWidth: '480px', margin: '1rem auto 0', padding: '1rem', background: 'var(--danger-glow)', border: '1px solid var(--danger)', borderRadius: '8px', color: 'var(--danger)', fontSize: '0.9rem', textAlign: 'center', fontWeight: '600' }}>
@@ -339,7 +338,7 @@ function App() {
         return (
           <div className="exam-layout" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '70vh' }}>
             <div className="card" style={{ border: '2px solid var(--danger)', padding: '4rem 2rem', textAlign: 'center', maxWidth: '500px', width: '100%', boxShadow: 'var(--shadow-danger-glow)' }}>
-              <div style={{ width: '80px', height: '80px', background: 'var(--danger-glow)', color: 'var(--danger)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem', display: 'flex', justifyContent: 'center' }}>
+              <div style={{ width: '80px', height: '80px', background: 'var(--danger-glow)', color: 'var(--danger)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 2rem' }}>
                 <AlertOctagon size={42} style={{ alignSelf: 'center' }} />
               </div>
               <h1 className="text-gradient-danger" style={{ fontSize: '2.2rem', marginBottom: '1rem', fontWeight: '800' }}>
@@ -365,6 +364,7 @@ function App() {
         return (
           <Home 
             onStartActivity={handleRegisterStudent} 
+            onGoToTeacher={() => navigate('/docente')}
           />
         );
     }
@@ -379,7 +379,7 @@ function App() {
       <header className="app-navbar">
         <div className="logo-container" style={{ cursor: isStudentLocked ? 'not-allowed' : 'pointer' }} onClick={() => { if (!isStudentLocked) handleGoToHome(); }}>
           <Activity className="logo-icon" size={26} />
-          <span className="logo-text">Addison Challenge</span>
+          <span className="logo-text">{APP_NAME}</span>
         </div>
 
         <div className="nav-actions">
@@ -403,9 +403,14 @@ function App() {
             </div>
           )}
 
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Docente: <strong>F. Salamanca</strong>
-          </div>
+          <button
+            type="button"
+            className="btn btn-ghost"
+            onClick={() => navigate('/docente')}
+            style={{ fontSize: '0.85rem', padding: '0.5rem 0.85rem' }}
+          >
+            Panel docente
+          </button>
         </div>
       </header>
 
@@ -415,12 +420,12 @@ function App() {
       </main>
 
       {/* Premium Footer */}
-      <footer style={{ borderTop: '1px solid var(--border-color)', padding: '1.5rem', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)', background: 'rgba(11, 19, 26, 0.4)' }}>
+      <footer style={{ borderTop: '1px solid var(--border-color)', padding: '1.5rem', textAlign: 'center', fontSize: '0.85rem', color: 'var(--text-muted)', background: 'rgba(255, 255, 255, 0.75)' }}>
         <p>
-          <strong>Addison Challenge</strong> — Demo Educativa Interactiva sobre la Enfermedad de Addison y Casos Clínicos.
+          <strong>{APP_NAME}</strong> — Plataforma para crear aulas, tareas, exámenes seguros y seguimiento académico.
         </p>
         <p style={{ marginTop: '0.25rem', fontSize: '0.8rem' }}>
-          Creado por <strong style={{ color: 'var(--primary)' }}>Fabrizio Salamanca</strong> para docentes y estudiantes de ciencias de la salud. Todos los derechos reservados © 2026.
+          Suite educativa para colegios, universidades y centros de formación. Todos los derechos reservados © 2026.
         </p>
       </footer>
     </div>

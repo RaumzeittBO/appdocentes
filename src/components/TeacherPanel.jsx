@@ -36,7 +36,7 @@ import {
 
 const defaultAddisonActivity = {
   code: "ADDISON",
-  title: "Addison Challenge",
+  title: "Plantilla demo: Enfermedad de Addison",
   directExam: false,
   sessionActive: false,
   flowchart: [
@@ -639,7 +639,7 @@ export default function TeacherPanel({ onGoToHome }) {
       <aside className="card" style={{ padding: '1.25rem', display: 'flex', flexDirection: 'column', gap: '1rem', height: 'fit-content' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', color: 'var(--primary)', fontWeight: 'bold', fontSize: '0.95rem' }}>
           <BookOpen size={16} />
-          <span>LISTA DE ACTIVIDADES</span>
+          <span>AULAS Y ACTIVIDADES</span>
         </div>
 
         <button 
@@ -657,7 +657,7 @@ export default function TeacherPanel({ onGoToHome }) {
           style={{ padding: '0.6rem', fontSize: '0.85rem', width: '100%', gap: '0.25rem' }}
         >
           <Plus size={16} />
-          Crear Actividad
+          Nueva actividad
         </button>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', overflowY: 'auto', maxHeight: '420px', marginTop: '0.5rem' }}>
@@ -714,7 +714,7 @@ export default function TeacherPanel({ onGoToHome }) {
               {activeActivity ? activeActivity.title : "Cargando..."}
             </h2>
             <p>
-              Código de acceso para alumnos: <strong style={{ color: 'var(--primary)', fontFamily: 'var(--font-mono)', fontSize: '1.2rem' }}>{selectedActivityCode}</strong>
+              Código de acceso para estudiantes: <strong style={{ color: 'var(--primary)', fontFamily: 'var(--font-mono)', fontSize: '1.2rem' }}>{selectedActivityCode}</strong>
               {activeActivity?.directExam && <span style={{ marginLeft: '1rem', color: 'var(--warning)', fontSize: '0.85rem', border: '1px solid var(--warning)', padding: '0.15rem 0.5rem', borderRadius: '4px' }}>Modo: Examen Directo</span>}
             </p>
           </div>
@@ -731,12 +731,12 @@ export default function TeacherPanel({ onGoToHome }) {
               {activeActivity?.sessionActive ? (
                 <>
                   <PauseCircle size={18} />
-                  <span>Pausar Actividad</span>
+                  <span>Pausar clase</span>
                 </>
               ) : (
                 <>
                   <PlayCircle size={18} />
-                  <span>Iniciar Actividad</span>
+                  <span>Iniciar clase</span>
                 </>
               )}
             </button>
@@ -748,7 +748,7 @@ export default function TeacherPanel({ onGoToHome }) {
               style={{ borderColor: 'var(--primary-border)' }}
             >
               <Edit size={16} style={{ color: 'var(--primary)' }} />
-              Editar Actividad
+              Editar contenido
             </button>
 
             <button className="btn btn-secondary" onClick={onGoToHome}>
@@ -803,7 +803,7 @@ export default function TeacherPanel({ onGoToHome }) {
             <div className="card panel-card">
               <h3>
                 <FileSpreadsheet size={18} className="logo-icon" />
-                Estudiantes Registrados ({results.length})
+                Estudiantes de la sesión ({results.length})
               </h3>
               
               {loadingDashboard ? (
