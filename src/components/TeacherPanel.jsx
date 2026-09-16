@@ -33,6 +33,7 @@ import {
   ListTodo,
   Loader2
 } from 'lucide-react';
+import { lmaActivity } from '../data/lmaQuestions';
 
 const defaultAddisonActivity = {
   code: "ADDISON",
@@ -195,7 +196,7 @@ const formatDateTime = (isoString) => {
 export default function TeacherPanel({ onGoToHome }) {
   // Activity Manager State
   const [activitiesList, setActivitiesList] = useState([]);
-  const [selectedActivityCode, setSelectedActivityCode] = useState('ADDISON');
+  const [selectedActivityCode, setSelectedActivityCode] = useState('LMA');
   const [activeActivity, setActiveActivity] = useState(null);
 
   // Monitoring Sync State
@@ -242,13 +243,15 @@ export default function TeacherPanel({ onGoToHome }) {
     try {
       const list = await listActivities();
       const hasAddison = list.some(act => act.code === 'ADDISON');
+      const hasLma = list.some(act => act.code === 'LMA');
+      if (!hasLma) {
+        await saveActivity('LMA', lmaActivity);
+      }
       if (list.length === 0 || !hasAddison) {
         await saveActivity('ADDISON', defaultAddisonActivity);
-        const updatedList = await listActivities();
-        setActivitiesList(updatedList);
-      } else {
-        setActivitiesList(list);
       }
+      const updatedList = await listActivities();
+      setActivitiesList(updatedList.sort((a, b) => (a.code === 'LMA' ? -1 : b.code === 'LMA' ? 1 : a.code.localeCompare(b.code))));
     } catch (e) {
       console.error("Error loading activities list:", e);
     }
@@ -398,15 +401,15 @@ export default function TeacherPanel({ onGoToHome }) {
 
   // Delete dynamic activity
   const handleDeleteActivity = async (code) => {
-    if (code === 'ADDISON') {
-      alert("No se permite eliminar la actividad predeterminada ADDISON.");
+    if (code === 'ADDISON' || code === 'LMA') {
+      alert("No se permite eliminar las actividades predeterminadas ADDISON o LMA.");
       return;
     }
     if (window.confirm(`¿Deseas eliminar permanentemente la actividad "${code}"?`)) {
       try {
         await deleteActivity(code);
         if (selectedActivityCode === code) {
-          setSelectedActivityCode('ADDISON');
+          setSelectedActivityCode('LMA');
         }
         refreshActivities();
       } catch (e) {
@@ -621,13 +624,22 @@ export default function TeacherPanel({ onGoToHome }) {
   const rankingList = [...results]
     .filter(r => r.estado && r.estado !== 'descalificado' && r.estado !== 'registrado')
     .sort((a, b) => {
+      const accuracyA = a.precision || ((a.correctas || a.puntaje || 0) / Math.max(a.totalPreguntas || activeActivity?.questions?.length || 1, 1));
+      const accuracyB = b.precision || ((b.correctas || b.puntaje || 0) / Math.max(b.totalPreguntas || activeActivity?.questions?.length || 1, 1));
+      if (accuracyB !== accuracyA) {
+        return accuracyB - accuracyA;
+      }
       if (b.puntaje !== a.puntaje) {
         return b.puntaje - a.puntaje;
+      }
+      if ((b.rachaMax || 0) !== (a.rachaMax || 0)) {
+        return (b.rachaMax || 0) - (a.rachaMax || 0);
       }
       return parseTimeToSeconds(a.tiempo) - parseTimeToSeconds(b.tiempo);
     });
 
   const suggestedWinner = rankingList.length > 0 ? rankingList[0] : null;
+  const podiumWinners = rankingList.slice(0, 4);
 
   // Check if Gemini key is available in environment
   const isServerKeyAvailable = !!import.meta.env.VITE_GEMINI_API_KEY;
@@ -686,7 +698,7 @@ export default function TeacherPanel({ onGoToHome }) {
                     {act.title}
                   </span>
                 </div>
-                {act.code !== 'ADDISON' && (
+                {act.code !== 'ADDISON' && act.code !== 'LMA' && (
                   <button 
                     onClick={(e) => {
                       e.stopPropagation();
@@ -767,19 +779,34 @@ export default function TeacherPanel({ onGoToHome }) {
           </div>
         </div>
 
-        {/* Suggested Winner */}
+        {/* Final podium */}
         {suggestedWinner ? (
-          <div className="winner-banner">
+          <div className="winner-banner podium-banner">
             <div className="winner-icon">
               <Trophy size={28} />
             </div>
-            <div className="winner-details">
-              <h3>Ganador sugerido de la sesión</h3>
-              <p style={{ fontSize: '1.25rem' }}>
-                <strong>{suggestedWinner.nombre}</strong> — {suggestedWinner.puntaje} puntos en {suggestedWinner.tiempo}
-              </p>
+            <div className="winner-details" style={{ width: '100%' }}>
+              <h3>Podium Codigo Rojo: 4 ganadores</h3>
+              <div className="podium-grid">
+                {podiumWinners.map((winner, index) => (
+                  <div key={winner.id || winner.nombre} className={`podium-card podium-${index + 1}`}>
+                    <span className="podium-place">{index + 1}</span>
+                    <strong>{winner.nombre}</strong>
+                    <small>
+                      {winner.puntaje} pts · {winner.correctas ?? winner.puntaje} correctas · racha {winner.rachaMax || 0}
+                    </small>
+                  </div>
+                ))}
+                {Array.from({ length: Math.max(0, 4 - podiumWinners.length) }).map((_, index) => (
+                  <div key={`empty-${index}`} className="podium-card podium-empty">
+                    <span className="podium-place">{podiumWinners.length + index + 1}</span>
+                    <strong>Disponible</strong>
+                    <small>Esperando finalistas</small>
+                  </div>
+                ))}
+              </div>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                (Mayor calificación en menor tiempo de respuesta, excluyendo descalificaciones)
+                Orden: precision, puntaje total, racha y menor tiempo. La velocidad no supera a la precision.
               </span>
             </div>
           </div>
@@ -842,7 +869,7 @@ export default function TeacherPanel({ onGoToHome }) {
                               </div>
                             </td>
                             <td style={{ fontFamily: 'var(--font-mono)' }}>
-                              {res.estado === 'registrado' ? '—' : `${res.puntaje} / ${activeActivity?.questions?.length || 7}`}
+                              {res.estado === 'registrado' ? '—' : `${res.puntaje || 0} pts (${res.correctas ?? 0}/${res.totalPreguntas || activeActivity?.questions?.length || 7})`}
                             </td>
                             <td style={{ fontFamily: 'var(--font-mono)' }}>
                               {res.estado === 'registrado' ? '—' : (res.tiempo || '0:00')}

@@ -42,10 +42,11 @@ function App() {
   const [score, setScore] = useState(0);
   const [timeTaken, setTimeTaken] = useState('');
   const [selectedAnswers, setSelectedAnswers] = useState([]);
+  const [playedQuestions, setPlayedQuestions] = useState([]);
 
   // Teacher Authentication State
   const [isTeacherLoggedIn, setIsTeacherLoggedIn] = useState(
-    () => sessionStorage.getItem('addison_teacher_logged') === 'true'
+    () => sessionStorage.getItem('aulanova_teacher_logged') === 'true'
   );
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
@@ -68,9 +69,9 @@ function App() {
 
   // Check persistent disqualification on mount
   useEffect(() => {
-    const savedDq = localStorage.getItem('addison_dq_reason');
-    const savedName = localStorage.getItem('addison_student_name');
-    const savedCode = localStorage.getItem('addison_activity_code');
+    const savedDq = localStorage.getItem('aulanova_dq_reason');
+    const savedName = localStorage.getItem('aulanova_student_name');
+    const savedCode = localStorage.getItem('aulanova_activity_code');
     if (savedDq && savedName && savedCode) {
       setStudentName(savedName);
       setActivityCode(savedCode);
@@ -114,13 +115,13 @@ function App() {
 
       setActivityData(activeAct);
       setActivityCode(code);
-      localStorage.setItem('addison_activity_code', code);
+      localStorage.setItem('aulanova_activity_code', code);
 
       // 2. Register student in this activity's results subcollection
       const docId = await registerStudent(code, name);
       setStudentResultId(docId);
       setStudentName(name);
-      localStorage.setItem('addison_student_name', name);
+      localStorage.setItem('aulanova_student_name', name);
       
       // 3. Move to Lobby or directly to Exam/Flowchart if already active
       if (activeAct.sessionActive) {
@@ -138,10 +139,11 @@ function App() {
     }
   };
 
-  const handleFinishExam = (finalScore, time, answers) => {
+  const handleFinishExam = (finalScore, time, answers, usedQuestions = []) => {
     setScore(finalScore);
     setTimeTaken(time);
     setSelectedAnswers(answers);
+    setPlayedQuestions(usedQuestions);
     setCurrentView('results');
   };
 
@@ -149,7 +151,7 @@ function App() {
   const handleStudentDisqualified = (reason) => {
     setDqReason(reason);
     setCurrentView('disqualified');
-    localStorage.setItem('addison_dq_reason', reason);
+    localStorage.setItem('aulanova_dq_reason', reason);
   };
 
   const handleGoToHome = () => {
@@ -160,6 +162,7 @@ function App() {
     setScore(0);
     setTimeTaken('');
     setSelectedAnswers([]);
+    setPlayedQuestions([]);
     setDqReason('');
     setActivityError('');
     setCurrentView('home');
@@ -171,7 +174,7 @@ function App() {
     e.preventDefault();
     if (loginEmail === TEACHER_EMAIL && loginPassword === TEACHER_PASSWORD) {
       setIsTeacherLoggedIn(true);
-      sessionStorage.setItem('addison_teacher_logged', 'true');
+      sessionStorage.setItem('aulanova_teacher_logged', 'true');
       setLoginError('');
     } else {
       setLoginError('Credenciales incorrectas. Inténtalo de nuevo.');
@@ -180,7 +183,7 @@ function App() {
 
   const handleTeacherLogout = () => {
     setIsTeacherLoggedIn(false);
-    sessionStorage.removeItem('addison_teacher_logged');
+    sessionStorage.removeItem('aulanova_teacher_logged');
     setLoginEmail('');
     setLoginPassword('');
     navigate('/');
@@ -328,7 +331,7 @@ function App() {
             timeTaken={timeTaken} 
             selectedAnswers={selectedAnswers} 
             studentName={studentName} 
-            questions={activityData?.questions || []}
+            questions={playedQuestions.length > 0 ? playedQuestions : (activityData?.questions || [])}
             onGoToHome={handleGoToHome} 
             onGoToTeacher={() => navigate('/docente')}
           />

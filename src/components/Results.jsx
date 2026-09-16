@@ -1,14 +1,15 @@
 import React from 'react';
-import { Clock, ArrowRight, RotateCcw, ShieldCheck, XCircle, CheckCircle } from 'lucide-react';
+import { CheckCircle, Clock, RotateCcw, ShieldCheck, Trophy, XCircle } from 'lucide-react';
 
-export default function Results({ score, timeTaken, selectedAnswers, studentName, questions = [], onGoToHome, onGoToTeacher }) {
-  const percentage = questions.length > 0 ? Math.round((score / questions.length) * 100) : 0;
+export default function Results({ score, timeTaken, selectedAnswers, studentName, questions = [], onGoToHome }) {
+  const correctTotal = selectedAnswers.filter((ans, index) => ans === questions[index]?.correctAnswer).length;
+  const percentage = questions.length > 0 ? Math.round((correctTotal / questions.length) * 100) : 0;
 
   const getFeedbackMessage = () => {
-    if (score === questions.length) return "¡Perfecto! Excelente dominio de la materia.";
-    if (score >= Math.round(questions.length * 0.7)) return "¡Buen trabajo! Tienes un sólido conocimiento del tema.";
-    if (score >= Math.round(questions.length * 0.4)) return "Buen intento. Te recomendamos repasar los detalles de las tarjetas de estudio.";
-    return "Es necesario revisar la fisiopatología, diagnóstico y tratamiento del tema clínico.";
+    if (percentage === 100) return 'Guardia impecable. Excelente dominio del caso.';
+    if (percentage >= 70) return 'Buen trabajo. Tu precision diagnostica fue solida.';
+    if (percentage >= 40) return 'Buen intento. Conviene repasar laboratorio, diagnostico y decisiones clinicas.';
+    return 'Necesitas reforzar reconocimiento, urgencias y criterios de sospecha en LMA.';
   };
 
   return (
@@ -17,25 +18,26 @@ export default function Results({ score, timeTaken, selectedAnswers, studentName
         <div className="badge-wrapper">
           <div className="score-badge-circle">
             <span className="score-badge-value">{score}</span>
-            <span className="score-badge-label">de {questions.length}</span>
+            <span className="score-badge-label">puntos</span>
           </div>
         </div>
 
-        <h2 className="results-status-title">¡Examen Finalizado!</h2>
-        <p style={{ fontSize: '1.1rem', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem' }}>
-          Felicitaciones, <strong style={{ color: 'var(--primary)' }}>{studentName}</strong>. Tu resultado ha sido guardado con éxito.
+        <h2 className="results-status-title">Codigo Rojo completado</h2>
+        <p style={{ fontSize: '1.1rem', marginBottom: '2rem', maxWidth: '500px', margin: '0 auto 2rem', display: 'flex', gap: '0.4rem', justifyContent: 'center', alignItems: 'center', flexWrap: 'wrap' }}>
+          <Trophy size={18} />
+          Bien jugado, <strong style={{ color: 'var(--primary)' }}>{studentName}</strong>. Tu resultado ya entro al ranking.
         </p>
 
         <div className="results-metrics">
           <div className="metric-item">
-            <span className="metric-label">Calificación</span>
-            <span className="metric-value" style={{ color: score >= Math.round(questions.length * 0.7) ? 'var(--success)' : 'var(--warning)' }}>
-              {percentage}%
+            <span className="metric-label">Precision</span>
+            <span className="metric-value" style={{ color: percentage >= 70 ? 'var(--success)' : 'var(--warning)' }}>
+              {percentage}% ({correctTotal}/{questions.length})
             </span>
           </div>
 
           <div className="metric-item">
-            <span className="metric-label">Tiempo Empleado</span>
+            <span className="metric-label">Tiempo empleado</span>
             <span className="metric-value" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}>
               <Clock size={16} />
               {timeTaken}
@@ -50,28 +52,26 @@ export default function Results({ score, timeTaken, selectedAnswers, studentName
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
           <button className="btn btn-secondary" onClick={onGoToHome}>
             <RotateCcw size={16} />
-            Volver a inicio
+            Volver al inicio
           </button>
         </div>
       </div>
 
-      {/* Answer Review */}
       <div className="card" style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         <h3 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.75rem' }}>
           <ShieldCheck size={20} className="logo-icon" />
-          Revisión de Preguntas
+          Revision educativa
         </h3>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
           {questions.map((q, idx) => {
             const isCorrect = selectedAnswers[idx] === q.correctAnswer;
             return (
-              <div 
-                key={idx} 
-                style={{ 
+              <div
+                key={q.id || idx}
+                style={{
                   borderLeft: `3px solid ${isCorrect ? 'var(--success)' : 'var(--danger)'}`,
-                  paddingLeft: '1rem',
-                  background: 'rgba(255, 255, 255, 0.01)',
+                  background: 'rgba(255, 255, 255, 0.62)',
                   padding: '1rem',
                   borderRadius: '4px'
                 }}
@@ -91,15 +91,16 @@ export default function Results({ score, timeTaken, selectedAnswers, studentName
                   )}
                 </div>
 
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.9rem' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem', fontSize: '0.9rem' }}>
                   <div style={{ color: isCorrect ? 'var(--success)' : 'var(--text-muted)' }}>
-                    <strong>Tu respuesta:</strong> {selectedAnswers[idx] !== null ? q.options[selectedAnswers[idx]] : "Sin respuesta"}
+                    <strong>Tu respuesta:</strong> {selectedAnswers[idx] !== null && selectedAnswers[idx] !== undefined ? q.options[selectedAnswers[idx]] : 'Sin respuesta'}
                   </div>
                   {!isCorrect && (
                     <div style={{ color: 'var(--success)' }}>
                       <strong>Respuesta correcta:</strong> {q.options[q.correctAnswer]}
                     </div>
                   )}
+                  {q.explanation && <div style={{ color: 'var(--text-muted)' }}><strong>Clave:</strong> {q.explanation}</div>}
                 </div>
               </div>
             );

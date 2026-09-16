@@ -50,7 +50,7 @@ const roadmapItems = [
 
 export default function Home({ onStartActivity, onGoToTeacher }) {
   const [name, setName] = useState('');
-  const [code, setCode] = useState('ADDISON');
+  const [code, setCode] = useState('LMA');
   const [error, setError] = useState('');
 
   const handleSubmit = (e) => {
@@ -75,12 +75,11 @@ export default function Home({ onStartActivity, onGoToTeacher }) {
             <School size={16} />
             <span>Plataforma para docentes, colegios y universidades</span>
           </div>
-          <h1>AulaNova</h1>
-          <span className="author-tag">Aulas, tareas y examenes seguros en un solo lugar</span>
+          <h1>LMA: Codigo Rojo</h1>
+          <span className="author-tag">Diagnostica. Decide. Sobrevive a la guardia.</span>
           <p>
-            Gestiona clases, crea actividades, publica material de estudio y toma examenes con
-            supervision antitrampa. Esta primera version ya permite sesiones sincronizadas,
-            panel docente en tiempo real y evaluaciones protegidas.
+            Juego competitivo sobre leucemia mieloblastica aguda para clase: rondas clinicas,
+            laboratorio, diagnostico, decisiones y un final con cuatro ganadores.
           </p>
           <div className="hero-actions">
             <a className="btn btn-primary" href="#acceso-estudiante">
@@ -124,8 +123,8 @@ export default function Home({ onStartActivity, onGoToTeacher }) {
           <div className="mock-list">
             <div>
               <CheckCircle2 size={16} />
-              Examen final publicado
-              <span>10 preguntas</span>
+              Codigo Rojo preparado
+              <span>42 desafios</span>
             </div>
             <div>
               <LockKeyhole size={16} />
@@ -134,8 +133,8 @@ export default function Home({ onStartActivity, onGoToTeacher }) {
             </div>
             <div>
               <CalendarCheck size={16} />
-              Tarea semanal
-              <span>pendiente</span>
+              Podium final
+              <span>4 ganadores</span>
             </div>
           </div>
         </div>
@@ -177,7 +176,7 @@ export default function Home({ onStartActivity, onGoToTeacher }) {
                 id="activity-code"
                 type="text"
                 className="form-control"
-                placeholder="Ej. BIO101"
+                placeholder="Ej. LMA"
                 value={code}
                 onChange={(e) => {
                   setCode(e.target.value);
