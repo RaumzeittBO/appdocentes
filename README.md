@@ -46,10 +46,9 @@ Ruta:
 
 Credenciales:
 
-- Si `VITE_TEACHER_EMAIL` y `VITE_TEACHER_PASSWORD` estan configuradas, usa esas.
-- Si no existen variables de entorno, el codigo incluye credenciales demo fallback:
-  - correo: `docente@aulanova.edu`
-  - contrasena: `Fabrizio2026`
+- Correo de acceso garantizado: `admin@aulanova.edu`
+- Contrasena: `AulaNova2026`
+- Si `VITE_TEACHER_EMAIL` y `VITE_TEACHER_PASSWORD` estan configuradas, esas credenciales adicionales tambien son aceptadas.
 
 ## Juego listo para clase
 

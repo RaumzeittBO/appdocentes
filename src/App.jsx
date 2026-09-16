@@ -20,8 +20,10 @@ import {
 
 // Client-side authentication credentials
 const APP_NAME = 'AulaNova';
-const TEACHER_EMAIL = import.meta.env.VITE_TEACHER_EMAIL || 'docente@aulanova.edu';
-const TEACHER_PASSWORD = import.meta.env.VITE_TEACHER_PASSWORD || 'Fabrizio2026';
+const DEFAULT_TEACHER_EMAIL = 'admin@aulanova.edu';
+const DEFAULT_TEACHER_PASSWORD = 'AulaNova2026';
+const CONFIGURED_TEACHER_EMAIL = import.meta.env.VITE_TEACHER_EMAIL?.trim().toLowerCase();
+const CONFIGURED_TEACHER_PASSWORD = import.meta.env.VITE_TEACHER_PASSWORD?.trim();
 
 function App() {
   // Navigation Routing State
@@ -172,7 +174,14 @@ function App() {
   // Teacher Login Action
   const handleTeacherLogin = (e) => {
     e.preventDefault();
-    if (loginEmail === TEACHER_EMAIL && loginPassword === TEACHER_PASSWORD) {
+    const normalizedEmail = loginEmail.trim().toLowerCase();
+    const normalizedPassword = loginPassword.trim();
+    const matchesDefault = normalizedEmail === DEFAULT_TEACHER_EMAIL && normalizedPassword === DEFAULT_TEACHER_PASSWORD;
+    const matchesConfigured = CONFIGURED_TEACHER_EMAIL && CONFIGURED_TEACHER_PASSWORD
+      && normalizedEmail === CONFIGURED_TEACHER_EMAIL
+      && normalizedPassword === CONFIGURED_TEACHER_PASSWORD;
+
+    if (matchesDefault || matchesConfigured) {
       setIsTeacherLoggedIn(true);
       sessionStorage.setItem('aulanova_teacher_logged', 'true');
       setLoginError('');
@@ -211,7 +220,7 @@ function App() {
                   <input 
                     type="email" 
                     className="form-control" 
-                    placeholder="docente@aulanova.edu"
+                    placeholder="admin@aulanova.edu"
                     required
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}

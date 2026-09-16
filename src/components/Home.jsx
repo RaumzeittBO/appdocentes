@@ -1,60 +1,23 @@
 import React, { useState } from 'react';
 import {
-  BarChart3,
-  BookOpen,
   CalendarCheck,
   CheckCircle2,
-  ClipboardList,
-  FileQuestion,
   GraduationCap,
   KeyRound,
-  Layers3,
   LockKeyhole,
-  MonitorCheck,
   Play,
   School,
   ShieldCheck,
-  User,
-  Users
+  User
 } from 'lucide-react';
 
-const platformModules = [
-  {
-    icon: School,
-    title: 'Aulas y cursos',
-    description: 'Organiza materias por aula, comparte codigos de acceso y prepara sesiones en vivo.'
-  },
-  {
-    icon: FileQuestion,
-    title: 'Examenes seguros',
-    description: 'Pantalla completa, alertas por cambio de pestana, bloqueo de copiar/pegar y registro de incidentes.'
-  },
-  {
-    icon: ClipboardList,
-    title: 'Tareas y actividades',
-    description: 'Estructura tareas, cuestionarios, guias de estudio y entregas con seguimiento por estudiante.'
-  },
-  {
-    icon: BarChart3,
-    title: 'Notas y reportes',
-    description: 'Visualiza resultados, tiempos, estados, ranking y alertas desde el panel docente en tiempo real.'
-  }
-];
-
-const roadmapItems = [
-  'Autenticacion por institucion y roles',
-  'Banco de preguntas por materia',
-  'Tareas con archivos y rubricas',
-  'Pagos mensuales y planes SaaS'
-];
-
-export default function Home({ onStartActivity, onGoToTeacher }) {
+export default function Home({ onStartActivity }) {
   const [name, setName] = useState('');
   const [code, setCode] = useState('LMA');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = (event) => {
+    event.preventDefault();
     if (!name.trim()) {
       setError('Por favor, ingresa tu nombre completo para comenzar.');
       return;
@@ -69,100 +32,30 @@ export default function Home({ onStartActivity, onGoToTeacher }) {
 
   return (
     <div className="landing-page">
-      <section className="landing-hero">
-        <div className="home-hero">
-          <div className="home-badge">
-            <School size={16} />
-            <span>Plataforma para docentes, colegios y universidades</span>
-          </div>
-          <h1>LMA: Codigo Rojo</h1>
-          <span className="author-tag">Diagnostica. Decide. Sobrevive a la guardia.</span>
-          <p>
-            Juego competitivo sobre leucemia mieloblastica aguda para clase: rondas clinicas,
-            laboratorio, diagnostico, decisiones y un final con cuatro ganadores.
-          </p>
-          <div className="hero-actions">
-            <a className="btn btn-primary" href="#acceso-estudiante">
-              <GraduationCap size={18} />
-              Entrar como estudiante
-            </a>
-            <button type="button" className="btn btn-secondary" onClick={onGoToTeacher}>
-              <MonitorCheck size={18} />
-              Ir al panel docente
-            </button>
-          </div>
-          <div className="product-highlights">
-            <div><ShieldCheck size={18} /> Examenes seguros</div>
-            <div><BookOpen size={18} /> Cursos y aulas</div>
-            <div><ClipboardList size={18} /> Tareas y reportes</div>
-          </div>
-        </div>
-
-        <div className="hero-product-card">
-          <div className="hero-product-header">
-            <div>
-              <span className="mini-label">Panel docente</span>
-              <h2>Clase en vivo</h2>
-            </div>
-            <span className="status-pill">Activa</span>
-          </div>
-          <div className="hero-metrics">
-            <div>
-              <strong>32</strong>
-              <span>estudiantes</span>
-            </div>
-            <div>
-              <strong>94%</strong>
-              <span>avance</span>
-            </div>
-            <div>
-              <strong>2</strong>
-              <span>alertas</span>
-            </div>
-          </div>
-          <div className="mock-list">
-            <div>
-              <CheckCircle2 size={16} />
-              Codigo Rojo preparado
-              <span>15 preguntas</span>
-            </div>
-            <div>
-              <LockKeyhole size={16} />
-              Supervision antitrampa
-              <span>activa</span>
-            </div>
-            <div>
-              <CalendarCheck size={16} />
-              Podium final
-              <span>4 ganadores</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="landing-section section-split" id="acceso-estudiante">
+      <section className="landing-section section-split student-access-first" id="acceso-estudiante">
         <div className="card">
-          <h2 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            <User className="logo-icon" size={24} />
-            Acceso del estudiante
-          </h2>
+          <div className="home-badge" style={{ marginBottom: '1rem' }}>
+            <GraduationCap size={16} />
+            <span>Acceso directo al juego</span>
+          </div>
+          <h1 style={{ marginBottom: '0.65rem' }}>Entrar como estudiante</h1>
           <p style={{ marginBottom: '1.5rem' }}>
-            Usa el codigo que tu docente comparte en clase para entrar a la sala de espera,
-            estudiar el material y rendir el examen seguro.
+            Escribe tu nombre y el codigo compartido por tu docente para ingresar a la actividad.
           </p>
 
           <form onSubmit={handleSubmit}>
             <div className="input-group">
-              <label htmlFor="student-name" className="input-label">Nombre y Apellidos</label>
+              <label htmlFor="student-name" className="input-label">Nombre y apellidos</label>
               <input
                 id="student-name"
                 type="text"
                 className="form-control"
                 placeholder="Ej. Ana Maria Gomez"
+                autoFocus
                 value={name}
-                onChange={(e) => {
-                  setName(e.target.value);
-                  if (e.target.value.trim()) setError('');
+                onChange={(event) => {
+                  setName(event.target.value);
+                  if (event.target.value.trim()) setError('');
                 }}
               />
             </div>
@@ -178,9 +71,9 @@ export default function Home({ onStartActivity, onGoToTeacher }) {
                 className="form-control"
                 placeholder="Ej. LMA"
                 value={code}
-                onChange={(e) => {
-                  setCode(e.target.value);
-                  if (e.target.value.trim()) setError('');
+                onChange={(event) => {
+                  setCode(event.target.value);
+                  if (event.target.value.trim()) setError('');
                 }}
                 style={{ fontFamily: 'var(--font-mono)', textTransform: 'uppercase' }}
               />
@@ -203,110 +96,54 @@ export default function Home({ onStartActivity, onGoToTeacher }) {
 
         <div className="student-preview card">
           <div className="panel-preview-title">
-            <GraduationCap size={20} />
+            <User size={20} />
             <div>
-              <h3>Panel estudiante</h3>
-              <p>Vista inicial para mostrar el flujo que construiremos por fases.</p>
+              <h3>LMA: Codigo Rojo</h3>
+              <p>Diagnostica. Decide. Sobrevive a la guardia.</p>
             </div>
           </div>
           <div className="student-track">
-            <div className="track-item active"><span>1</span> Registro en aula</div>
-            <div className="track-item active"><span>2</span> Sala sincronizada</div>
-            <div className="track-item"><span>3</span> Material y tareas</div>
-            <div className="track-item"><span>4</span> Examen protegido</div>
-            <div className="track-item"><span>5</span> Resultados</div>
+            <div className="track-item active"><span>1</span> Ingresa con tu codigo</div>
+            <div className="track-item active"><span>2</span> Espera al docente</div>
+            <div className="track-item"><span>3</span> Responde 15 preguntas</div>
+            <div className="track-item"><span>4</span> Suma puntos y rachas</div>
+            <div className="track-item"><span>5</span> Revisa el resultado</div>
           </div>
         </div>
       </section>
 
-      <section className="landing-section">
-        <div className="section-heading">
-          <span className="mini-label">Suite educativa</span>
-          <h2>Todo lo necesario para venderlo como plataforma mensual</h2>
+      <section className="landing-hero compact-game-hero">
+        <div className="home-hero">
+          <div className="home-badge">
+            <School size={16} />
+            <span>Juego educativo competitivo</span>
+          </div>
+          <h1>LMA: Codigo Rojo</h1>
+          <span className="author-tag">Diagnostica. Decide. Sobrevive a la guardia.</span>
           <p>
-            La base actual cubre evaluacion segura. El diseno ya presenta el producto como una suite
-            completa para docentes, instituciones y estudiantes.
+            Rondas clinicas sobre leucemia mieloblastica aguda, laboratorio, diagnostico,
+            decisiones medicas y un final con cuatro ganadores.
           </p>
+          <div className="product-highlights">
+            <div><ShieldCheck size={18} /> Examen seguro</div>
+            <div><GraduationCap size={18} /> 15 preguntas</div>
+            <div><CalendarCheck size={18} /> 4 ganadores</div>
+          </div>
         </div>
-        <div className="module-grid">
-          {platformModules.map((module) => {
-            const Icon = module.icon;
-            return (
-              <div className="module-card" key={module.title}>
-                <Icon size={22} />
-                <h3>{module.title}</h3>
-                <p>{module.description}</p>
-              </div>
-            );
-          })}
-        </div>
-      </section>
 
-      <section className="landing-section teacher-showcase">
-        <div>
-          <span className="mini-label">Panel docente</span>
-          <h2>Administra sesiones, contenidos y alertas desde una sola pantalla</h2>
-          <p>
-            El panel actual ya permite crear actividades, iniciar o pausar la clase, ver registros,
-            escuchar alertas y revisar resultados. En las siguientes fases lo convertiremos en un
-            dashboard multi-curso con usuarios reales y suscripciones.
-          </p>
-          <button type="button" className="btn btn-primary" onClick={onGoToTeacher}>
-            <MonitorCheck size={18} />
-            Abrir panel docente
-          </button>
-        </div>
-        <div className="teacher-preview-card">
-          <div className="preview-row">
-            <span><Users size={16} /> Aula BIO101</span>
-            <strong>En vivo</strong>
-          </div>
-          <div className="preview-progress"><span style={{ width: '78%' }}></span></div>
-          <div className="preview-stats">
-            <div><strong>18</strong><span>registrados</span></div>
-            <div><strong>14</strong><span>completados</span></div>
-            <div><strong>1</strong><span>alerta</span></div>
-          </div>
-        </div>
-      </section>
-
-      <section className="landing-section">
-        <div className="section-heading">
-          <span className="mini-label">Planes futuros</span>
-          <h2>Preparado para mensualidades</h2>
-          <p>Esta estructura visual ya deja claro como se monetizara la plataforma.</p>
-        </div>
-        <div className="pricing-grid">
-          <div className="pricing-card">
-            <h3>Docente</h3>
-            <strong>Bs. 49/mes</strong>
-            <p>Para profesores independientes que necesitan aulas y examenes seguros.</p>
-          </div>
-          <div className="pricing-card featured">
-            <h3>Institucion</h3>
-            <strong>Bs. 199/mes</strong>
-            <p>Para colegios, institutos y universidades con multiples docentes.</p>
-          </div>
-          <div className="pricing-card">
-            <h3>Campus</h3>
-            <strong>A medida</strong>
-            <p>Usuarios ilimitados, soporte, reportes avanzados e integraciones.</p>
-          </div>
-        </div>
-      </section>
-
-      <section className="landing-section roadmap-strip">
-        <div>
-          <span className="mini-label">Siguientes fases</span>
-          <h2>Lo que falta para completar el producto</h2>
-        </div>
-        <div className="roadmap-list">
-          {roadmapItems.map((item) => (
-            <div key={item}>
-              <Layers3 size={16} />
-              {item}
+        <div className="hero-product-card">
+          <div className="hero-product-header">
+            <div>
+              <span className="mini-label">Partida en vivo</span>
+              <h2>Codigo Rojo</h2>
             </div>
-          ))}
+            <span className="status-pill">Lista</span>
+          </div>
+          <div className="mock-list">
+            <div><CheckCircle2 size={16} /> Banco aleatorio <span>15 preguntas</span></div>
+            <div><LockKeyhole size={16} /> Supervision antitrampa <span>activa</span></div>
+            <div><CalendarCheck size={16} /> Podium final <span>4 ganadores</span></div>
+          </div>
         </div>
       </section>
     </div>
