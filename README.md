@@ -71,6 +71,8 @@ Subtitulo:
 Diagnostica. Decide. Sobrevive a la guardia.
 ```
 
+Cada partida usa **15 preguntas maximo**, seleccionadas y mezcladas desde el banco LMA.
+
 ## Flujo docente
 
 1. Entrar a `/docente`.

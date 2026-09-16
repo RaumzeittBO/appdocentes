@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { updateStudentResult, saveCheatingAlert } from '../services/activityService';
 import { AlertTriangle, Award, Clock, Flame, HeartPulse, RefreshCw, ShieldAlert, ShieldCheck, Zap } from 'lucide-react';
 
-const ROUND_LIMIT = 18;
+const ROUND_LIMIT = 15;
 const QUESTION_SECONDS = 22;
 
 const shuffle = (items) => [...items].sort(() => Math.random() - 0.5);

@@ -124,7 +124,7 @@ export default function Home({ onStartActivity, onGoToTeacher }) {
             <div>
               <CheckCircle2 size={16} />
               Codigo Rojo preparado
-              <span>42 desafios</span>
+              <span>15 preguntas</span>
             </div>
             <div>
               <LockKeyhole size={16} />
