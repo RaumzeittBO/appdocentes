@@ -78,8 +78,9 @@ Cada partida usa **15 preguntas maximo**, seleccionadas y mezcladas desde el ban
 1. Entrar a `/docente`.
 2. Seleccionar la actividad `LMA`.
 3. Opcional: pulsar `Limpiar Datos` para reiniciar jugadores, ranking y alertas.
-4. Pulsar `Iniciar clase`.
-5. Proyectar el panel docente si se desea ver ranking y alertas.
+4. Pulsar `Activar sonido` una vez para habilitar alarma y aviso por voz en el navegador del docente.
+5. Pulsar `Iniciar clase`.
+6. Proyectar el panel docente si se desea ver ranking y alertas.
 
 ## Flujo jugador
 
@@ -113,6 +114,18 @@ El juego conserva monitoreo del navegador:
 - F12.
 
 La politica actual es moderada: registra advertencias y penalizaciones. No expulsa automaticamente por una sola perdida de foco accidental.
+
+El panel docente muestra el nombre del estudiante, numero de alertas y puntos descontados. Cada incidente nuevo activa una alarma y un aviso por voz cuando el docente ha pulsado `Activar sonido`.
+
+## Simulacro aislado
+
+Para comprobar localmente 30 estudiantes ficticios sin escribir datos en Firestore:
+
+```bash
+npm run simulate:class
+```
+
+El simulacro procesa 450 respuestas, aplica penalizaciones antitrampa y valida que el ranking termine con exactamente cuatro ganadores.
 
 ## Datos guardados
 

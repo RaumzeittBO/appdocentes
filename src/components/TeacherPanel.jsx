@@ -34,6 +34,7 @@ import {
   Loader2
 } from 'lucide-react';
 import { lmaActivity } from '../data/lmaQuestions';
+import { rankGameResults } from '../utils/gameLogic';
 
 const defaultAddisonActivity = {
   code: "ADDISON",
@@ -233,6 +234,9 @@ export default function TeacherPanel({ onGoToHome }) {
   // Audio Alerts State
   const announcedAlertIds = useRef(new Set());
   const isFirstLoad = useRef(true);
+  const audioContextRef = useRef(null);
+  const audioEnabledRef = useRef(false);
+  const [audioEnabled, setAudioEnabled] = useState(false);
 
   // Fetch activities on mount
   useEffect(() => {
@@ -289,8 +293,6 @@ export default function TeacherPanel({ onGoToHome }) {
     // Alerts listener (Handles Teacher-side siren/voice alarm)
     const unsubscribeAlerts = listenAlerts(selectedActivityCode, (data) => {
       setAlerts(data);
-      
-      if (data.length === 0) return;
 
       // Skip old alerts on initial loading to prevent voice spam
       if (isFirstLoad.current) {
@@ -298,6 +300,8 @@ export default function TeacherPanel({ onGoToHome }) {
         isFirstLoad.current = false;
         return;
       }
+
+      if (data.length === 0) return;
 
       // Identify new alerts that aren't announced yet
       const newAlerts = data.filter(alert => !announcedAlertIds.current.has(alert.id));
@@ -324,7 +328,11 @@ export default function TeacherPanel({ onGoToHome }) {
   // Synthesize alarm sound on Teacher PC
   const playBuzzerAlarm = () => {
     try {
-      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (!audioEnabledRef.current) return;
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      const audioCtx = audioContextRef.current || new AudioContextClass();
+      audioContextRef.current = audioCtx;
+      if (audioCtx.state === 'suspended') audioCtx.resume();
       const playTone = (startTime, freq, duration) => {
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
@@ -343,6 +351,21 @@ export default function TeacherPanel({ onGoToHome }) {
       playTone(audioCtx.currentTime + 0.6, 587.33, 0.25);
     } catch (e) {
       console.warn("Teacher PC Buzzer synthesis failed:", e);
+    }
+  };
+
+  const enableAlertAudio = async () => {
+    try {
+      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+      if (!AudioContextClass) return;
+      const audioCtx = audioContextRef.current || new AudioContextClass();
+      audioContextRef.current = audioCtx;
+      await audioCtx.resume();
+      audioEnabledRef.current = true;
+      setAudioEnabled(true);
+      playBuzzerAlarm();
+    } catch (error) {
+      console.warn('No se pudo activar el sonido de alertas:', error);
     }
   };
 
@@ -621,22 +644,16 @@ export default function TeacherPanel({ onGoToHome }) {
   };
 
   // Helper values
-  const rankingList = [...results]
-    .filter(r => r.estado && r.estado !== 'descalificado' && r.estado !== 'registrado')
-    .sort((a, b) => {
-      const accuracyA = a.precision || ((a.correctas || a.puntaje || 0) / Math.max(a.totalPreguntas || activeActivity?.questions?.length || 1, 1));
-      const accuracyB = b.precision || ((b.correctas || b.puntaje || 0) / Math.max(b.totalPreguntas || activeActivity?.questions?.length || 1, 1));
-      if (accuracyB !== accuracyA) {
-        return accuracyB - accuracyA;
-      }
-      if (b.puntaje !== a.puntaje) {
-        return b.puntaje - a.puntaje;
-      }
-      if ((b.rachaMax || 0) !== (a.rachaMax || 0)) {
-        return (b.rachaMax || 0) - (a.rachaMax || 0);
-      }
-      return parseTimeToSeconds(a.tiempo) - parseTimeToSeconds(b.tiempo);
-    });
+  const rankingList = rankGameResults(results, activeActivity?.questions?.length || 15);
+
+  const alertsByStudent = alerts.reduce((summary, alertItem) => {
+    const name = alertItem.studentName || 'Sin nombre';
+    const penaltyMatch = alertItem.message?.match(/Penalizacion: -(\d+)/i);
+    summary[name] = summary[name] || { count: 0, penalty: 0 };
+    summary[name].count += 1;
+    summary[name].penalty += penaltyMatch ? Number(penaltyMatch[1]) : 0;
+    return summary;
+  }, {});
 
   const suggestedWinner = rankingList.length > 0 ? rankingList[0] : null;
   const podiumWinners = rankingList.slice(0, 4);
@@ -767,6 +784,11 @@ export default function TeacherPanel({ onGoToHome }) {
               Cerrar Sesión
             </button>
 
+            <button className="btn btn-secondary" onClick={enableAlertAudio} disabled={audioEnabled}>
+              <BellRing size={16} style={{ color: audioEnabled ? 'var(--success)' : 'var(--warning)' }} />
+              {audioEnabled ? 'Sonido activo' : 'Activar sonido'}
+            </button>
+
             <button className="btn btn-secondary" onClick={handleSimulateAlert} style={{ borderColor: 'var(--warning-border)' }}>
               <Sparkles size={16} style={{ color: 'var(--warning)' }} />
               Simular Alerta
@@ -848,6 +870,7 @@ export default function TeacherPanel({ onGoToHome }) {
                         <th>Estudiante</th>
                         <th>Calificación</th>
                         <th>Tiempo</th>
+                        <th>Supervision</th>
                         <th>Estado</th>
                         <th>Registro</th>
                       </tr>
@@ -855,9 +878,11 @@ export default function TeacherPanel({ onGoToHome }) {
                     <tbody>
                       {results.map((res) => {
                         const isCheater = res.estado === 'descalificado';
+                        const incident = alertsByStudent[res.nombre];
+                        const hasIncidents = Boolean(incident?.count || res.advertencias);
                         return (
                           <tr key={res.id}>
-                            <td style={{ fontWeight: '600', color: isCheater ? 'var(--danger)' : 'var(--text-main)' }}>
+                            <td style={{ fontWeight: '600', color: (isCheater || hasIncidents) ? 'var(--danger)' : 'var(--text-main)' }}>
                               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                                 <span>{res.nombre}</span>
                                 {isCheater && (
@@ -866,6 +891,9 @@ export default function TeacherPanel({ onGoToHome }) {
                                     <span>⚠️ ¡HIZO TRAMPA!</span>
                                   </span>
                                 )}
+                                {!isCheater && hasIncidents && (
+                                  <span className="alert-badge">{incident?.count || res.advertencias} aviso(s)</span>
+                                )}
                               </div>
                             </td>
                             <td style={{ fontFamily: 'var(--font-mono)' }}>
@@ -873,6 +901,15 @@ export default function TeacherPanel({ onGoToHome }) {
                             </td>
                             <td style={{ fontFamily: 'var(--font-mono)' }}>
                               {res.estado === 'registrado' ? '—' : (res.tiempo || '0:00')}
+                            </td>
+                            <td>
+                              {hasIncidents ? (
+                                <span className="badge badge-danger">
+                                  {incident?.count || res.advertencias} alerta(s) · -{incident?.penalty || res.penalizacion || 0} pts
+                                </span>
+                              ) : (
+                                <span className="badge badge-success">Sin incidentes</span>
+                              )}
                             </td>
                             <td>
                               {res.estado === 'registrado' ? (

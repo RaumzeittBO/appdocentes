@@ -1,9 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { updateStudentResult, saveCheatingAlert } from '../services/activityService';
 import { AlertTriangle, Award, Clock, Flame, HeartPulse, RefreshCw, ShieldAlert, ShieldCheck, Zap } from 'lucide-react';
+import { calculateAntiCheatPenalty, calculateQuestionPoints, QUESTION_SECONDS } from '../utils/gameLogic';
 
 const ROUND_LIMIT = 15;
-const QUESTION_SECONDS = 22;
 
 const shuffle = (items) => [...items].sort(() => Math.random() - 0.5);
 
@@ -69,7 +69,7 @@ export default function Exam({ studentName, studentResultId, activityCode, quest
     setWarningReason(reason);
     setIsWarningActive(true);
 
-    const penaltyValue = nextWarnings <= 2 ? 15 : 40;
+    const penaltyValue = calculateAntiCheatPenalty(nextWarnings);
     penaltyRef.current += penaltyValue;
     setPenalty(penaltyRef.current);
 
@@ -155,10 +155,12 @@ export default function Exam({ studentName, studentResultId, activityCode, quest
     clearInterval(timerRef.current);
 
     const isCorrect = optionIndex === currentQuestion.correctAnswer;
-    const speedBonus = isCorrect ? Math.round((questionSeconds / QUESTION_SECONDS) * 20) : 0;
     const nextStreak = isCorrect ? streak + 1 : 0;
-    const streakBonus = isCorrect ? Math.min(nextStreak * 5, 30) : 0;
-    const gained = isCorrect ? 100 + speedBonus + streakBonus : 0;
+    const gained = calculateQuestionPoints({
+      isCorrect,
+      secondsRemaining: questionSeconds,
+      streak: nextStreak
+    });
     const nextScore = score + gained;
     const nextCorrect = correctCount + (isCorrect ? 1 : 0);
     const nextMaxStreak = Math.max(maxStreakRef.current, nextStreak);
